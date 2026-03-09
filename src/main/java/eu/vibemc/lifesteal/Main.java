@@ -29,7 +29,7 @@ public final class Main extends JavaPlugin {
         Main.instance = this;
 
         if (!CommandAPIDependency.ensureInstalled(getLogger())) {
-            getLogger().severe("P-LifeSteal requires CommandAPI. It has been downloaded - please restart the server.");
+            getLogger().severe("P-LifeSteal requires CommandAPI. It has been downloaded please restart the server.");
             return;
         }
 
@@ -46,7 +46,7 @@ public final class Main extends JavaPlugin {
     public void onEnable() {
         if (!commandApiAvailable) {
             getLogger().severe("*** P-LifeSteal is disabled because CommandAPI is not loaded. ***");
-            getLogger().severe("*** Please restart the server to load the auto-downloaded CommandAPI. ***");
+            getLogger().severe("*** Please restart the server to load the auto downloaded CommandAPI. ***");
             Bukkit.getPluginManager().disablePlugin(this);
             return;
         }
