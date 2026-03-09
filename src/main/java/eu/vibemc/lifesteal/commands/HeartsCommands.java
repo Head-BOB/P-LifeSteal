@@ -29,6 +29,10 @@ public class HeartsCommands {
                 .executes((sender, args) -> {
                     List<PlayerProfile> profiles = (List<PlayerProfile>) args.get("player");
                     Player player = org.bukkit.Bukkit.getPlayer(profiles.getFirst().getUniqueId());
+                    if (player == null) {
+                        sender.sendMessage("§cPlayer must be online.");
+                        return;
+                    }
                     int amount = (int) args.get("amount");
                     player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(player.getAttribute(Attribute.MAX_HEALTH).getBaseValue() + amount);
                     player.sendMessage(Config.getMessage("heartAdded").replace("${amount}", String.valueOf(amount / 2)));
@@ -44,6 +48,10 @@ public class HeartsCommands {
                 .executes((sender, args) -> {
                     List<PlayerProfile> profiles = (List<PlayerProfile>) args.get("player");
                     Player player = org.bukkit.Bukkit.getPlayer(profiles.getFirst().getUniqueId());
+                    if (player == null) {
+                        sender.sendMessage("§cPlayer must be online.");
+                        return;
+                    }
                     int amount = (int) args.get("amount");
                     player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(amount);
                     player.sendMessage(Config.getMessage("heartSetted").replace("${amount}", String.valueOf(amount / 2)));
@@ -60,6 +68,10 @@ public class HeartsCommands {
                 .executes((sender, args) -> {
                     List<PlayerProfile> profiles = (List<PlayerProfile>) args.get("player");
                     Player player = org.bukkit.Bukkit.getPlayer(profiles.getFirst().getUniqueId());
+                    if (player == null) {
+                        sender.sendMessage("§cPlayer must be online.");
+                        return;
+                    }
                     int amount = (int) args.get("amount");
                     player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(player.getAttribute(Attribute.MAX_HEALTH).getBaseValue() - amount);
                     player.sendMessage(Config.getMessage("heartRemoved").replace("${amount}", String.valueOf(amount / 2)));
@@ -76,6 +88,10 @@ public class HeartsCommands {
                 .executes((sender, args) -> {
                     List<PlayerProfile> profiles = (List<PlayerProfile>) args.get("player");
                     Player player = org.bukkit.Bukkit.getPlayer(profiles.getFirst().getUniqueId());
+                    if (player == null) {
+                        sender.sendMessage("§cPlayer must be online.");
+                        return;
+                    }
                     int amount = (int) player.getAttribute(Attribute.MAX_HEALTH).getBaseValue();
                     sender.sendMessage(Config.getMessage("heartCheck").replace("${amount}", String.valueOf(amount / 2)).replace("${player}", player.getName()));
                 });

@@ -12,21 +12,29 @@ import java.util.logging.Logger;
 
 public class CommandAPIDependency {
 
-    private static final String COMMANDAPI_VERSION = "11.0.0";
+    private static final String COMMANDAPI_VERSION = "11.1.0";
     private static final String COMMANDAPI_JAR = "CommandAPI-" + COMMANDAPI_VERSION + "-Paper.jar";
-    private static final String DOWNLOAD_URL = "https://github.com/CommandAPI/CommandAPI/releases/download/" + COMMANDAPI_VERSION + "/" + COMMANDAPI_JAR;
+    private static final String DOWNLOAD_URL = "https://github.com/CommandAPI/CommandAPI/releases/download/"
+            + COMMANDAPI_VERSION + "/" + COMMANDAPI_JAR;
 
     public static boolean ensureInstalled(Logger logger) {
-        File pluginsFolder = new File("plugins");
+        File pluginsFolder = eu.vibemc.lifesteal.Main.getInstance().getDataFolder().getParentFile();
+        if (pluginsFolder == null || !pluginsFolder.exists() || !pluginsFolder.isDirectory()) {
+            logger.severe("Could not find the plugins folder.");
+            return false;
+        }
         File commandApiFile = new File(pluginsFolder, COMMANDAPI_JAR);
 
         if (Bukkit.getPluginManager().getPlugin("CommandAPI") != null) {
             return true;
         }
 
-        for (File file : pluginsFolder.listFiles()) {
-            if (file.getName().startsWith("CommandAPI-") && file.getName().endsWith(".jar")) {
-                return true;
+        File[] files = pluginsFolder.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (file.getName().startsWith("CommandAPI-") && file.getName().endsWith(".jar")) {
+                    return true;
+                }
             }
         }
 
