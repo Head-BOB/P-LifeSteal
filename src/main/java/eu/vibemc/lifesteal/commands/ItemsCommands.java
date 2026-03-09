@@ -24,6 +24,10 @@ public class ItemsCommands {
                 .withArguments(new PlayerProfileArgument("player"), new IntegerArgument("chance_of_success"), new IntegerArgument("amount")).executes((sender, args) -> {
                     List<PlayerProfile> profiles = (List<PlayerProfile>) args.get("player");
                     Player player = org.bukkit.Bukkit.getPlayer(profiles.getFirst().getUniqueId());
+                    if (player == null) {
+                        sender.sendMessage("§cPlayer must be online.");
+                        return;
+                    }
                     int chance = (int) args.get("chance_of_success");
                     int amount = (int) args.get("amount");
                     for (int i = 0; i < amount; i++) {
@@ -40,6 +44,10 @@ public class ItemsCommands {
                 executes((sender, args) -> {
                     List<PlayerProfile> profiles = (List<PlayerProfile>) args.get("player");
                     Player player = org.bukkit.Bukkit.getPlayer(profiles.getFirst().getUniqueId());
+                    if (player == null) {
+                        sender.sendMessage("§cPlayer must be online.");
+                        return;
+                    }
                     int amount = (int) args.get("amount");
                     for (int i = 0; i < amount; i++) {
                         player.getInventory().addItem(Items.ReviveBook.getReviveBook());
