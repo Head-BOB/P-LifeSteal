@@ -1,14 +1,17 @@
 package eu.vibemc.lifesteal.commands;
 
 import dev.jorel.commandapi.CommandAPICommand;
-import dev.jorel.commandapi.arguments.OfflinePlayerArgument;
+import dev.jorel.commandapi.arguments.PlayerProfileArgument;
 import eu.vibemc.lifesteal.Main;
 import eu.vibemc.lifesteal.bans.BanStorageUtil;
 import eu.vibemc.lifesteal.bans.models.Ban;
 import eu.vibemc.lifesteal.other.Config;
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.profile.PlayerProfile;
 
 import java.io.IOException;
+import java.util.List;
 
 public class BansCommands {
     public static CommandAPICommand getAllBansCommands() {
@@ -26,9 +29,11 @@ public class BansCommands {
     private static CommandAPICommand getRemoveBanCommand() {
         return new CommandAPICommand("remove")
                 .withPermission("lifesteal.bans.remove")
-                .withArguments(new OfflinePlayerArgument("player"))
+                .withArguments(new PlayerProfileArgument("player"))
                 .executes((sender, args) -> {
-                    OfflinePlayer player = (OfflinePlayer) args.get("player");
+                    List<PlayerProfile> profiles = (List<PlayerProfile>) args.get("player");
+                    PlayerProfile profile = profiles.getFirst();
+                    OfflinePlayer player = Bukkit.getOfflinePlayer(profile.getUniqueId());
                     try {
                         if (player.getName() == null) {
                             sender.sendMessage(Config.getMessage("playerNotFound"));

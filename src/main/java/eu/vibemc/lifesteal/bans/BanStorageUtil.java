@@ -50,7 +50,7 @@ public class BanStorageUtil {
             saveBans();
             createdBan = ban;
         }
-        player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(Config.getInt("reviveHeartAmount"));
+        player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(Config.getInt("reviveHeartAmount"));
         Bukkit.getScheduler().scheduleSyncDelayedTask(Main.getInstance(), () -> {
             if (player.isOnline()) {
                 if (Config.getBoolean("banOn0Hearts")) {

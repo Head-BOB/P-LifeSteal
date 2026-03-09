@@ -44,7 +44,7 @@ public class LSExpansion extends PlaceholderExpansion {
         if (params.equalsIgnoreCase("hearts")) {
             try {
                 if (player != null) {
-                    return String.valueOf((int) player.getPlayer().getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue() / 2);
+                    return String.valueOf((int) player.getPlayer().getAttribute(Attribute.MAX_HEALTH).getBaseValue() / 2);
                 }
             } catch (NullPointerException ignored) {
 
@@ -54,7 +54,7 @@ public class LSExpansion extends PlaceholderExpansion {
         if (params.equalsIgnoreCase("health")) {
             try {
                 if (player != null) {
-                    return String.valueOf((int) player.getPlayer().getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue());
+                    return String.valueOf((int) player.getPlayer().getAttribute(Attribute.MAX_HEALTH).getBaseValue());
                 }
             } catch (NullPointerException ignored) {
 
