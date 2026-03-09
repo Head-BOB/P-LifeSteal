@@ -94,7 +94,7 @@ public class MainCommands {
                             sender.sendMessage(Config.getMessage("featureDisabled"));
                             return;
                         }
-                        if (player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue() - 2 <= 0) {
+                        if (player.getAttribute(Attribute.MAX_HEALTH).getBaseValue() - 2 <= 0) {
                             try {
                                 player.getInventory().addItem(Items.ExtraHeart.getExtraHeart(100));
                                 player.updateInventory();
@@ -105,7 +105,7 @@ public class MainCommands {
                                 throw new RuntimeException(e);
                             }
                         } else {
-                            player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue() - 2);
+                            player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(player.getAttribute(Attribute.MAX_HEALTH).getBaseValue() - 2);
                             // check if player's inventory isnt full
                             if (player.getInventory().firstEmpty() == -1) {
                                 player.getWorld().dropItem(player.getLocation(), Items.ExtraHeart.getExtraHeart(100));

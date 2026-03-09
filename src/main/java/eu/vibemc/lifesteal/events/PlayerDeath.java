@@ -45,22 +45,22 @@ public class PlayerDeath implements Listener {
                         }
                     }
                 }
-                if (killed.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue() - 2 <= 0) {
+                if (killed.getAttribute(Attribute.MAX_HEALTH).getBaseValue() - 2 <= 0) {
                     BanStorageUtil.createBan(killed);
                 } else {
                     // remove 2 from max health of killed killed
-                    killed.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(killed.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue() - 2);
+                    killed.getAttribute(Attribute.MAX_HEALTH).setBaseValue(killed.getAttribute(Attribute.MAX_HEALTH).getBaseValue() - 2);
                     // send actionbar to killed killed
                     killed.sendMessage(Config.getMessage("heartLost"));
                     // send thunder sound to killed killed
                     killed.playSound(killed.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 100, 2);
                 }
-                if (Config.getInt("killHeartLimit") == 0 || killer.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue() + 2 <= Config.getInt("killHeartLimit")) {
+                if (Config.getInt("killHeartLimit") == 0 || killer.getAttribute(Attribute.MAX_HEALTH).getBaseValue() + 2 <= Config.getInt("killHeartLimit")) {
                     if (Config.getString("heartItem.drop.mode").equalsIgnoreCase("always")) {
                         killed.getWorld().dropItemNaturally(killed.getLocation(), Items.ExtraHeart.getExtraHeart(100));
                     } else {
                         // add 2 to max health of killer
-                        killer.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(killer.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue() + 2);
+                        killer.getAttribute(Attribute.MAX_HEALTH).setBaseValue(killer.getAttribute(Attribute.MAX_HEALTH).getBaseValue() + 2);
                         // send actionbar to killer
                         killer.sendMessage(Config.getMessage("heartGained").replace("${player}", killed.getName()));
                         // send level up sound to killer
@@ -106,7 +106,7 @@ public class PlayerDeath implements Listener {
                     }
                 }
             }
-            if (killed.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue() - 2 <= 0) {
+            if (killed.getAttribute(Attribute.MAX_HEALTH).getBaseValue() - 2 <= 0) {
                 BanStorageUtil.createBan(killed);
             } else {
                 if (killer == null) {
@@ -115,19 +115,19 @@ public class PlayerDeath implements Listener {
                     }
                 }
                 // remove 2 from max health of killed killed
-                killed.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(killed.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue() - 2);
+                killed.getAttribute(Attribute.MAX_HEALTH).setBaseValue(killed.getAttribute(Attribute.MAX_HEALTH).getBaseValue() - 2);
                 // send actionbar to killed killed
                 killed.sendMessage(Config.getMessage("heartLost"));
                 // send thunder sound to killed killed
                 killed.playSound(killed.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 100, 2);
             }
             if (killer != null) {
-                if (Config.getInt("killHeartLimit") == 0 || killer.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue() + 2 <= Config.getInt("killHeartLimit")) {
+                if (Config.getInt("killHeartLimit") == 0 || killer.getAttribute(Attribute.MAX_HEALTH).getBaseValue() + 2 <= Config.getInt("killHeartLimit")) {
                     if (Config.getString("heartItem.drop.mode").equalsIgnoreCase("always")) {
                         killed.getWorld().dropItemNaturally(killed.getLocation(), Items.ExtraHeart.getExtraHeart(100));
                     } else {
                         // add 2 to max health of killer
-                        killer.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(killer.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue() + 2);
+                        killer.getAttribute(Attribute.MAX_HEALTH).setBaseValue(killer.getAttribute(Attribute.MAX_HEALTH).getBaseValue() + 2);
                         // send actionbar to killer
                         killer.sendMessage(Config.getMessage("heartGained").replace("${player}", killed.getName()));
                         // send level up sound to killer

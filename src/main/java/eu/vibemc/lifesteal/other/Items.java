@@ -143,9 +143,9 @@ public class Items {
             // generate random number between 0 and 100 and check if it is less than the chance
             int random = (int) (Math.random() * 100);
             if (chance > random) {
-                if (Config.getInt("heartItem.addLimit") == 0 || player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue() + 2 <= Config.getInt("heartItem.addLimit")) {
+                if (Config.getInt("heartItem.addLimit") == 0 || player.getAttribute(Attribute.MAX_HEALTH).getBaseValue() + 2 <= Config.getInt("heartItem.addLimit")) {
                     item.setAmount(item.getAmount() - 1);
-                    player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue() + 2);
+                    player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(player.getAttribute(Attribute.MAX_HEALTH).getBaseValue() + 2);
                     player.sendMessage(Config.getMessage("heartReceived"));
                     player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 100, 1);
                 } else {
@@ -160,10 +160,10 @@ public class Items {
                     player.sendMessage(Config.getMessage("heartFailure"));
                     player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 100, 1);
                 } else {
-                    if (player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue() - 2 <= 0) {
+                    if (player.getAttribute(Attribute.MAX_HEALTH).getBaseValue() - 2 <= 0) {
                         BanStorageUtil.createBan(player);
                     } else {
-                        player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue() - 2);
+                        player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(player.getAttribute(Attribute.MAX_HEALTH).getBaseValue() - 2);
                         player.sendMessage(Config.getMessage("heartLost"));
                         player.playSound(player.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 100, 2);
                     }
