@@ -13,14 +13,20 @@ import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.UUID;
 
 public class Items {
+
+    private static final NamespacedKey KEY_ITEM = new NamespacedKey("lifesteal", "item");
+    private static final NamespacedKey KEY_CHANCE = new NamespacedKey("lifesteal", "chance");
+    private static final NamespacedKey KEY_PLAYER_UUID = new NamespacedKey("lifesteal", "player_uuid");
+    private static final char[] RECIPE_KEYS = "ABCDEFGHI".toCharArray();
 
     public static class ReviveBook {
         public static ItemStack getReviveBook() {
@@ -34,13 +40,16 @@ public class Items {
                 lore.add(Config.translateHexCodes(loreLine));
             }
             reviveBookMeta.setLore(lore);
-            reviveBookMeta.getPersistentDataContainer().set(new NamespacedKey("lifesteal", "item"), PersistentDataType.STRING, "reviveBook");
+            reviveBookMeta.getPersistentDataContainer().set(KEY_ITEM, PersistentDataType.STRING, "reviveBook");
             reviveBook.setItemMeta(reviveBookMeta);
             return reviveBook;
         }
 
         public static boolean isReviveBook(ItemStack item) {
-            return item.getItemMeta().getPersistentDataContainer().get(new NamespacedKey("lifesteal", "item"), PersistentDataType.STRING).equalsIgnoreCase("reviveBook");
+            if (item == null || !item.hasItemMeta()) return false;
+            PersistentDataContainer pdc = item.getItemMeta().getPersistentDataContainer();
+            if (!pdc.has(KEY_ITEM, PersistentDataType.STRING)) return false;
+            return "reviveBook".equalsIgnoreCase(pdc.get(KEY_ITEM, PersistentDataType.STRING));
         }
 
         public static void useReviveBook(Player player, ItemStack item) throws IOException {
@@ -64,30 +73,33 @@ public class Items {
                     lore.add(Config.translateHexCodes(loreLine));
                 }
                 bannedPlayerSkullMeta.setLore(lore);
+                // store uuid for reliable lookup
+                bannedPlayerSkullMeta.getPersistentDataContainer().set(KEY_PLAYER_UUID, PersistentDataType.STRING, ban.getPlayerUUID().toString());
                 bannedPlayerSkull.setItemMeta(bannedPlayerSkullMeta);
                 final SGButton playerToReviveButton = new SGButton(bannedPlayerSkull).withListener((InventoryClickEvent e) -> {
                     e.setCancelled(true);
                     ItemStack clickedItem = e.getCurrentItem();
-                    OfflinePlayer target = Main.getInstance().getServer().getOfflinePlayer(clickedItem.getItemMeta().getDisplayName().substring(4));
+                    if (clickedItem == null || !clickedItem.hasItemMeta()) return;
+                    String uuidStr = clickedItem.getItemMeta().getPersistentDataContainer().get(KEY_PLAYER_UUID, PersistentDataType.STRING);
+                    if (uuidStr == null) return;
+                    OfflinePlayer target = Bukkit.getOfflinePlayer(UUID.fromString(uuidStr));
                     try {
                         if (BanStorageUtil.deleteBan(target.getUniqueId())) {
-                            if (Config.getString("custom-commands.mode").equalsIgnoreCase("enabled")) {
+                            String mode = Config.getString("custom-commands.mode");
+                            if (mode.equalsIgnoreCase("enabled") || mode.equalsIgnoreCase("both")) {
                                 List<String> commands = Config.getStringList("custom-commands.onRevive");
                                 for (String command : commands) {
                                     Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), command.replace("%reviving%", player.getName()).replace("%revived%", target.getName()).replace("${reviving}", player.getName()).replace("${revived}", target.getName()));
                                 }
-                                return;
-                            }
-                            if (Config.getString("custom-commands.mode").equalsIgnoreCase("both")) {
-                                List<String> commands = Config.getStringList("custom-commands.onRevive");
-                                for (String command : commands) {
-                                    Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), command.replace("%reviving%", player.getName()).replace("%revived%", target.getName()).replace("${reviving}", player.getName()).replace("${revived}", target.getName()));
+                                if (mode.equalsIgnoreCase("enabled")) {
+                                    player.closeInventory();
+                                    return;
                                 }
                             }
                             player.sendMessage(Config.getMessage("playerRevived").replace("${player}", target.getName()));
                             player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 100, 1);
                             if (!Config.getBoolean("reviveBook.unbreakable")) {
-                                player.getItemInHand().setAmount(player.getItemInHand().getAmount() - 1);
+                                player.getInventory().getItemInMainHand().setAmount(player.getInventory().getItemInMainHand().getAmount() - 1);
                             }
                             player.updateInventory();
                             player.closeInventory();
@@ -118,18 +130,21 @@ public class Items {
                 lore.add(Config.translateHexCodes(loreLine).replace("${chance}", String.valueOf(chance)));
             }
             extraHeartMeta.setLore(lore);
-            extraHeartMeta.getPersistentDataContainer().set(new NamespacedKey("lifesteal", "item"), PersistentDataType.STRING, "extraHeart");
-            extraHeartMeta.getPersistentDataContainer().set(new NamespacedKey("lifesteal", "chance"), PersistentDataType.INTEGER, chance);
+            extraHeartMeta.getPersistentDataContainer().set(KEY_ITEM, PersistentDataType.STRING, "extraHeart");
+            extraHeartMeta.getPersistentDataContainer().set(KEY_CHANCE, PersistentDataType.INTEGER, chance);
             extraHeart.setItemMeta(extraHeartMeta);
             return extraHeart;
         }
 
         private static int getChance(ItemStack item) {
-            return item.getItemMeta().getPersistentDataContainer().get(new NamespacedKey("lifesteal", "chance"), PersistentDataType.INTEGER);
+            return item.getItemMeta().getPersistentDataContainer().get(KEY_CHANCE, PersistentDataType.INTEGER);
         }
 
         public static boolean isExtraHeart(ItemStack item) {
-            return item.getItemMeta().getPersistentDataContainer().get(new NamespacedKey("lifesteal", "item"), PersistentDataType.STRING).equalsIgnoreCase("extraHeart");
+            if (item == null || !item.hasItemMeta()) return false;
+            PersistentDataContainer pdc = item.getItemMeta().getPersistentDataContainer();
+            if (!pdc.has(KEY_ITEM, PersistentDataType.STRING)) return false;
+            return "extraHeart".equalsIgnoreCase(pdc.get(KEY_ITEM, PersistentDataType.STRING));
         }
 
         public static void useExtraHeart(Player player, ItemStack item) throws IOException {
@@ -172,108 +187,81 @@ public class Items {
         }
     }
 
-    public class Recipes {
+    public static class Recipes {
+
+        private static void setShapedIngredients(ShapedRecipe recipe, List<String> items) {
+            for (int i = 0; i < items.size() && i < 9; i++) {
+                Material material = Material.getMaterial(items.get(i));
+                if (material != null) {
+                    recipe.setIngredient(RECIPE_KEYS[i], material);
+                }
+            }
+        }
+
+        private static void registerShapedRecipe(String recipeName, String itemName, ItemStack result) {
+            ShapedRecipe shapedRecipe = new ShapedRecipe(new NamespacedKey("lifesteal", itemName + recipeName), result);
+            shapedRecipe.shape("ABC", "DEF", "GHI");
+            setShapedIngredients(shapedRecipe, Config.getStringList("recipe.recipes." + recipeName + ".items"));
+            Main.getInstance().getServer().addRecipe(shapedRecipe);
+        }
+
+        private static void registerShapelessRecipe(String recipeName, String itemName, ItemStack result) {
+            ShapelessRecipe shapelessRecipe = new ShapelessRecipe(new NamespacedKey("lifesteal", itemName + recipeName), result);
+            Config.getStringList("recipe.recipes." + recipeName + ".items").forEach(item -> {
+                shapelessRecipe.addIngredient(Material.getMaterial(item));
+            });
+            Main.getInstance().getServer().addRecipe(shapelessRecipe);
+        }
+
+        private static ItemStack getResultItem(String itemName, String recipeName) {
+            if (itemName.equalsIgnoreCase("revive_book")) {
+                return Items.ReviveBook.getReviveBook();
+            } else if (itemName.equalsIgnoreCase("extra_heart")) {
+                return Items.ExtraHeart.getExtraHeart(Config.getInt("recipe.recipes." + recipeName + ".extraHeartItemUseSuccess"));
+            }
+            return null;
+        }
+
         public static void registerRecipes() {
             if (Config.getBoolean("recipe.enabled")) {
                 Main.getInstance().getConfig().getConfigurationSection("recipe.recipes").getKeys(false).forEach(recipe -> {
                     if (Config.getBoolean("recipe.recipes." + recipe + ".recipe-enabled")) {
                         String itemName = Config.getString("recipe.recipes." + recipe + ".item");
-                        if (Config.getBoolean("recipe.recipes." + recipe + ".shaped")) {
-                            if (itemName.equalsIgnoreCase("revive_book")) {
-                                ShapedRecipe shapedRecipe = new ShapedRecipe(new NamespacedKey("lifesteal", itemName + recipe), Items.ReviveBook.getReviveBook());
-                                shapedRecipe.shape("ABC", "DEF", "GHI");
-                                AtomicInteger itemId = new AtomicInteger(0);
-                                Config.getStringList("recipe.recipes." + recipe + ".items").forEach(item -> {
-                                    var material = Material.getMaterial(item);
-                                    itemId.addAndGet(1);
-                                    if (itemId.get() == 1 && material != null) {
-                                        shapedRecipe.setIngredient('A', material);
-                                    }
-                                    if (itemId.get() == 2 && material != null) {
-                                        shapedRecipe.setIngredient('B', material);
-                                    }
-                                    if (itemId.get() == 3 && material != null) {
-                                        shapedRecipe.setIngredient('C', material);
-                                    }
-                                    if (itemId.get() == 4 && material != null) {
-                                        shapedRecipe.setIngredient('D', material);
-                                    }
-                                    if (itemId.get() == 5 && material != null) {
-                                        shapedRecipe.setIngredient('E', material);
-                                    }
-                                    if (itemId.get() == 6 && material != null) {
-                                        shapedRecipe.setIngredient('F', material);
-                                    }
-                                    if (itemId.get() == 7 && material != null) {
-                                        shapedRecipe.setIngredient('G', material);
-                                    }
-                                    if (itemId.get() == 8 && material != null) {
-                                        shapedRecipe.setIngredient('H', material);
-                                    }
-                                    if (itemId.get() == 9 && material != null) {
-                                        shapedRecipe.setIngredient('I', material);
-                                    }
-                                });
-                                Main.getInstance().getServer().addRecipe(shapedRecipe);
-                            }
-                            if (itemName.equalsIgnoreCase("extra_heart")) {
-                                ShapedRecipe shapedRecipe = new ShapedRecipe(new NamespacedKey("lifesteal", itemName + recipe), Items.ExtraHeart.getExtraHeart(Config.getInt("recipe.recipes." + recipe + ".extraHeartItemUseSuccess")));
-                                shapedRecipe.shape("ABC", "DEF", "GHI");
-                                AtomicInteger itemId = new AtomicInteger(0);
-                                Config.getStringList("recipe.recipes." + recipe + ".items").forEach(item -> {
-                                    var material = Material.getMaterial(item);
-                                    itemId.addAndGet(1);
-                                    if (itemId.get() == 1 && material != null) {
-                                        shapedRecipe.setIngredient('A', material);
-                                    }
-                                    if (itemId.get() == 2 && material != null) {
-                                        shapedRecipe.setIngredient('B', material);
-                                    }
-                                    if (itemId.get() == 3 && material != null) {
-                                        shapedRecipe.setIngredient('C', material);
-                                    }
-                                    if (itemId.get() == 4 && material != null) {
-                                        shapedRecipe.setIngredient('D', material);
-                                    }
-                                    if (itemId.get() == 5 && material != null) {
-                                        shapedRecipe.setIngredient('E', material);
-                                    }
-                                    if (itemId.get() == 6 && material != null) {
-                                        shapedRecipe.setIngredient('F', material);
-                                    }
-                                    if (itemId.get() == 7 && material != null) {
-                                        shapedRecipe.setIngredient('G', material);
-                                    }
-                                    if (itemId.get() == 8 && material != null) {
-                                        shapedRecipe.setIngredient('H', material);
-                                    }
-                                    if (itemId.get() == 9 && material != null) {
-                                        shapedRecipe.setIngredient('I', material);
-                                    }
-                                });
-                                Main.getInstance().getServer().addRecipe(shapedRecipe);
-                            }
+                        ItemStack result = getResultItem(itemName, recipe);
+                        if (result == null) return;
 
+                        if (Config.getBoolean("recipe.recipes." + recipe + ".shaped")) {
+                            registerShapedRecipe(recipe, itemName, result);
                         } else {
-                            if (itemName.equalsIgnoreCase("extra_heart")) {
-                                ShapelessRecipe shapelessRecipe = new ShapelessRecipe(new NamespacedKey("lifesteal", itemName + recipe), Items.ExtraHeart.getExtraHeart(Config.getInt("recipe.recipes." + recipe + ".extraHeartItemUseSuccess")));
-                                Config.getStringList("recipe.recipes." + recipe + ".items").forEach(item -> {
-                                    shapelessRecipe.addIngredient(Material.getMaterial(item));
-                                });
-                                Main.getInstance().getServer().addRecipe(shapelessRecipe);
-                            }
-                            if (itemName.equalsIgnoreCase("revive_book")) {
-                                ShapelessRecipe shapelessRecipe = new ShapelessRecipe(new NamespacedKey("lifesteal", itemName + recipe), Items.ReviveBook.getReviveBook());
-                                Config.getStringList("recipe.recipes." + recipe + ".items").forEach(item -> {
-                                    shapelessRecipe.addIngredient(Material.getMaterial(item));
-                                });
-                                Main.getInstance().getServer().addRecipe(shapelessRecipe);
-                            }
+                            registerShapelessRecipe(recipe, itemName, result);
                         }
                     }
-
                 });
             }
+        }
+
+        public static void discoverRecipesForPlayer(Player player) {
+            if (!Config.getBoolean("recipe.enabled")) return;
+            Main.getInstance().getConfig().getConfigurationSection("recipe.recipes").getKeys(false).forEach(recipe -> {
+                if (Config.getBoolean("recipe.recipes." + recipe + ".recipe-enabled")) {
+                    if (Config.getBoolean("recipe.recipes." + recipe + ".discover")) {
+                        String itemName = Config.getString("recipe.recipes." + recipe + ".item");
+                        player.discoverRecipe(new NamespacedKey("lifesteal", itemName + recipe));
+                    }
+                }
+            });
+        }
+
+        public static void undiscoverRecipesForPlayer(Player player) {
+            if (!Config.getBoolean("recipe.enabled")) return;
+            Main.getInstance().getConfig().getConfigurationSection("recipe.recipes").getKeys(false).forEach(recipe -> {
+                if (Config.getBoolean("recipe.recipes." + recipe + ".recipe-enabled")) {
+                    if (Config.getBoolean("recipe.recipes." + recipe + ".discover")) {
+                        String itemName = Config.getString("recipe.recipes." + recipe + ".item");
+                        player.undiscoverRecipe(new NamespacedKey("lifesteal", itemName + recipe));
+                    }
+                }
+            });
         }
 
         public static void unregisterRecipes() {

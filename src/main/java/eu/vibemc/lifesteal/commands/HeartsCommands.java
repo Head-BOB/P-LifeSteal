@@ -73,7 +73,8 @@ public class HeartsCommands {
                         return;
                     }
                     int amount = (int) args.get("amount");
-                    player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(player.getAttribute(Attribute.MAX_HEALTH).getBaseValue() - amount);
+                    double newHealth = Math.max(2, player.getAttribute(Attribute.MAX_HEALTH).getBaseValue() - amount);
+                    player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(newHealth);
                     player.sendMessage(Config.getMessage("heartRemoved").replace("${amount}", String.valueOf(amount / 2)));
                     sender.sendMessage(Config.getMessage("heartRemovedAdmin").replace("${amount}", String.valueOf(amount / 2)).replace("${player}", player.getName()));
 

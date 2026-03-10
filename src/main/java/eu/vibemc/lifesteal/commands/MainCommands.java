@@ -9,7 +9,6 @@ import eu.vibemc.lifesteal.other.Debug;
 import eu.vibemc.lifesteal.other.Items;
 import eu.vibemc.lifesteal.other.LootPopulator;
 import org.bukkit.Bukkit;
-import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
@@ -66,20 +65,6 @@ public class MainCommands {
 
                         sender.sendMessage("§aDebug Info Link: §e§l" + URL + key);
                     });
-
-
-//                    File config = new File(Main.getInstance().getDataFolder(), "config.yml");
-//                    // make bukkit async
-//                    Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance(), () -> {
-//                        URL url = new URL("https://pastebin.com/api/api_post.php");
-//                        URLConnection con = url.openConnection();
-//                        HttpURLConnection http = (HttpURLConnection)con;
-//                        http.setRequestMethod("POST");
-//                        http.setDoInput(true);
-//                        Map<String,String> arguments = new HashMap<>();
-//                        arguments.put("lang", "Plaintext");
-//                        http.connect();
-//                    });
                 });
     }
 
@@ -95,30 +80,20 @@ public class MainCommands {
                             return;
                         }
                         if (player.getAttribute(Attribute.MAX_HEALTH).getBaseValue() - 2 <= 0) {
-                            try {
-                                player.getInventory().addItem(Items.ExtraHeart.getExtraHeart(100));
-                                player.updateInventory();
-                                player.sendMessage(Config.getMessage("heartWithdrawn"));
-                                player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 100, 1);
-                                BanStorageUtil.createBan(player);
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
-                            }
-                        } else {
-                            player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(player.getAttribute(Attribute.MAX_HEALTH).getBaseValue() - 2);
-                            // check if player's inventory isnt full
-                            if (player.getInventory().firstEmpty() == -1) {
-                                player.getWorld().dropItem(player.getLocation(), Items.ExtraHeart.getExtraHeart(100));
-                                player.sendMessage(Config.getMessage("heartWithdrawn"));
-                                player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 100, 1);
-                            } else {
-                                player.getInventory().addItem(Items.ExtraHeart.getExtraHeart(100));
-                                player.updateInventory();
-                                player.sendMessage(Config.getMessage("heartWithdrawn"));
-                                player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 100, 1);
-                            }
+                            player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 100, 1);
+                            player.sendMessage(Config.getMessage("maxHearts").replace("${max}", "0"));
+                            return;
                         }
-
+                        player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(player.getAttribute(Attribute.MAX_HEALTH).getBaseValue() - 2);
+                        // check if player's inventory is full
+                        if (player.getInventory().firstEmpty() == -1) {
+                            player.getWorld().dropItem(player.getLocation(), Items.ExtraHeart.getExtraHeart(100));
+                        } else {
+                            player.getInventory().addItem(Items.ExtraHeart.getExtraHeart(100));
+                            player.updateInventory();
+                        }
+                        player.sendMessage(Config.getMessage("heartWithdrawn"));
+                        player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 100, 1);
                     } else {
                         sender.sendMessage(Config.getMessage("urNotPlayer"));
                     }
@@ -130,17 +105,9 @@ public class MainCommands {
                 .withPermission("lifesteal.reload")
                 .withShortDescription("Reloads config.")
                 .executes((sender, args) -> {
-                    if (Config.getBoolean("recipe.enabled")) {
-                        Main.getInstance().getConfig().getConfigurationSection("recipe.recipes").getKeys(false).forEach(recipe -> {
-                            if (Config.getBoolean("recipe.recipes." + recipe + ".recipe-enabled")) {
-                                if (Config.getBoolean("recipe.recipes." + recipe + ".discover")) {
-                                    String itemName = Config.getString("recipe.recipes." + recipe + ".item");
-                                    for (Player player : Bukkit.getOnlinePlayers()) {
-                                        player.undiscoverRecipe(new NamespacedKey("lifesteal", itemName + recipe));
-                                    }
-                                }
-                            }
-                        });
+                    // undiscover recipes from all players
+                    for (Player player : Bukkit.getOnlinePlayers()) {
+                        Items.Recipes.undiscoverRecipesForPlayer(player);
                     }
                     unregisterRecipes();
                     for (World world : Bukkit.getServer().getWorlds()) {
@@ -149,17 +116,9 @@ public class MainCommands {
                     Main.getInstance().reloadConfig();
                     sender.sendMessage(Config.getMessage("configReloaded"));
                     registerRecipes();
-                    if (Config.getBoolean("recipe.enabled")) {
-                        Main.getInstance().getConfig().getConfigurationSection("recipe.recipes").getKeys(false).forEach(recipe -> {
-                            if (Config.getBoolean("recipe.recipes." + recipe + ".recipe-enabled")) {
-                                if (Config.getBoolean("recipe.recipes." + recipe + ".discover")) {
-                                    String itemName = Config.getString("recipe.recipes." + recipe + ".item");
-                                    for (Player player : Bukkit.getOnlinePlayers()) {
-                                        player.discoverRecipe(new NamespacedKey("lifesteal", itemName + recipe));
-                                    }
-                                }
-                            }
-                        });
+                    // discover recipes for all players
+                    for (Player player : Bukkit.getOnlinePlayers()) {
+                        Items.Recipes.discoverRecipesForPlayer(player);
                     }
                     sender.sendMessage(Config.getMessage("recipesReloaded"));
                     if (Config.getBoolean("loot.enabled")) {

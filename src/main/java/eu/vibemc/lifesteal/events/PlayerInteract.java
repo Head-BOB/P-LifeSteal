@@ -6,6 +6,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
 
 import java.io.IOException;
 
@@ -15,16 +16,16 @@ public class PlayerInteract implements Listener {
     public void onPlayerInteract(PlayerInteractEvent e) throws IOException {
         Player player = e.getPlayer();
         Action action = e.getAction();
-        try {
-            if (action == Action.RIGHT_CLICK_BLOCK || action == Action.RIGHT_CLICK_AIR) {
-                if (Items.ExtraHeart.isExtraHeart(player.getInventory().getItemInMainHand())) {
-                    Items.ExtraHeart.useExtraHeart(player, player.getInventory().getItemInMainHand());
-                } else if (Items.ReviveBook.isReviveBook(player.getInventory().getItemInMainHand())) {
-                    Items.ReviveBook.useReviveBook(player, player.getInventory().getItemInMainHand());
-                }
+        if (action == Action.RIGHT_CLICK_BLOCK || action == Action.RIGHT_CLICK_AIR) {
+            ItemStack item = player.getInventory().getItemInMainHand();
+            if (item.getType().isAir() || !item.hasItemMeta()) {
+                return;
             }
-        } catch (NullPointerException ignored) {
+            if (Items.ExtraHeart.isExtraHeart(item)) {
+                Items.ExtraHeart.useExtraHeart(player, item);
+            } else if (Items.ReviveBook.isReviveBook(item)) {
+                Items.ReviveBook.useReviveBook(player, item);
+            }
         }
-
     }
 }

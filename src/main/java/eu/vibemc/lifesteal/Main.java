@@ -58,7 +58,7 @@ public final class Main extends JavaPlugin {
 
         getConfig().options().copyDefaults();
         saveDefaultConfig();
-        Config.Update();
+        Config.update();
 
         this.getServer().getPluginManager().registerEvents(new PlayerDeath(), this);
         this.getServer().getPluginManager().registerEvents(new PlayerInteract(), this);

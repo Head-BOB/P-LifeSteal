@@ -33,7 +33,7 @@ public class Config {
     }
 
     public static String getMessage(String path) {
-        return ChatColor.translateAlternateColorCodes('&', Main.getInstance().getConfig().getString("messages." + path));
+        return translateHexCodes(ChatColor.translateAlternateColorCodes('&', Main.getInstance().getConfig().getString("messages." + path)));
     }
 
     public static String translateHexCodes(String textToTranslate) {
@@ -49,7 +49,7 @@ public class Config {
 
     }
 
-    public static void Update() {
+    public static void update() {
         File file = new File(Main.getInstance().getDataFolder() + "/config.yml");
         YamlConfiguration externalFile = YamlConfiguration.loadConfiguration(file);
 

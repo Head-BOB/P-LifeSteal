@@ -3,6 +3,8 @@ package eu.vibemc.lifesteal.bans.models;
 import java.util.UUID;
 
 public class Ban {
+    public static final long PERMANENT_BAN_TIME = 5283862620L;
+
     private UUID playerUUID;
     private long unbanTime;
 
@@ -22,7 +24,7 @@ public class Ban {
     public long getUnbanTime() {
         // check if unbanTime is set
         if (this.unbanTime == 0) {
-            return 5283862620L;
+            return PERMANENT_BAN_TIME;
         }
         return this.unbanTime;
     }

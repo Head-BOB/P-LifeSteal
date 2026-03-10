@@ -50,14 +50,15 @@ public class LootPopulator extends BlockPopulator {
         try {
             Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
                 if (chunk.isLoaded()) {
-                    int heartRandom = (int) (Math.random() * 100);
-                    int bookRandom = (int) (Math.random() * 100);
-                    Main.getInstance().getConfig().getConfigurationSection("loot.worlds").getKeys(false).forEach(worldName -> {
-                        if (worldName.equals(chunk.getWorld().getName())) {
-                            if (Config.getInt("loot.worlds." + worldName + ".chanceForHeartToGenerate") > heartRandom) {
-                                inventory.addItem(Items.ExtraHeart.getExtraHeart(Config.getInt("loot.worlds." + worldName + ".heartAddChance")));
+                    String worldName = chunk.getWorld().getName();
+                    Main.getInstance().getConfig().getConfigurationSection("loot.worlds").getKeys(false).forEach(configWorld -> {
+                        if (configWorld.equals(worldName)) {
+                            int heartRandom = (int) (Math.random() * 100);
+                            int bookRandom = (int) (Math.random() * 100);
+                            if (Config.getInt("loot.worlds." + configWorld + ".chanceForHeartToGenerate") > heartRandom) {
+                                inventory.addItem(Items.ExtraHeart.getExtraHeart(Config.getInt("loot.worlds." + configWorld + ".heartAddChance")));
                             }
-                            if (Config.getInt("loot.worlds." + worldName + ".chanceForReviveBookToGenerate") > bookRandom) {
+                            if (Config.getInt("loot.worlds." + configWorld + ".chanceForReviveBookToGenerate") > bookRandom) {
                                 inventory.addItem(Items.ReviveBook.getReviveBook());
                             }
                         }

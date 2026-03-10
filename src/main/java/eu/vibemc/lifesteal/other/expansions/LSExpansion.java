@@ -7,6 +7,7 @@ import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -41,40 +42,37 @@ public class LSExpansion extends PlaceholderExpansion {
 
     @Override
     public String onRequest(OfflinePlayer player, String params) {
-        if (params.equalsIgnoreCase("hearts")) {
-            try {
-                if (player != null) {
-                    return String.valueOf((int) player.getPlayer().getAttribute(Attribute.MAX_HEALTH).getBaseValue() / 2);
-                }
-            } catch (NullPointerException ignored) {
-
+        if (player == null || !player.isOnline()) {
+            if (params.equalsIgnoreCase("hearts") || params.equalsIgnoreCase("health")) {
+                return "0";
             }
-
         }
-        if (params.equalsIgnoreCase("health")) {
-            try {
-                if (player != null) {
-                    return String.valueOf((int) player.getPlayer().getAttribute(Attribute.MAX_HEALTH).getBaseValue());
-                }
-            } catch (NullPointerException ignored) {
 
+        Player onlinePlayer = player != null ? player.getPlayer() : null;
+
+        if (params.equalsIgnoreCase("hearts")) {
+            if (onlinePlayer != null) {
+                return String.valueOf((int) onlinePlayer.getAttribute(Attribute.MAX_HEALTH).getBaseValue() / 2);
             }
+        }
 
+        if (params.equalsIgnoreCase("health")) {
+            if (onlinePlayer != null) {
+                return String.valueOf((int) onlinePlayer.getAttribute(Attribute.MAX_HEALTH).getBaseValue());
+            }
         }
 
         if (params.equalsIgnoreCase("banned")) {
-            try {
-                if (player != null) {
+            if (player != null) {
+                try {
                     if (BanStorageUtil.getBan(player.getUniqueId()) != null) {
                         return ChatColor.translateAlternateColorCodes('&', Config.getString("placeholder-api.banned-text"));
                     } else {
                         return ChatColor.translateAlternateColorCodes('&', Config.getString("placeholder-api.not-banned-text"));
                     }
+                } catch (IOException ignored) {
                 }
-            } catch (NullPointerException ignored) {
-            } catch (IOException ignored) {
             }
-
         }
 
         return "notfound"; // Placeholder is unknown by the Expansion

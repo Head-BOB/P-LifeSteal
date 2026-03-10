@@ -32,8 +32,8 @@ public class ItemsCommands {
                     int amount = (int) args.get("amount");
                     for (int i = 0; i < amount; i++) {
                         player.getInventory().addItem(Items.ExtraHeart.getExtraHeart(chance));
-                        player.updateInventory();
                     }
+                    player.updateInventory();
                 });
     }
 
@@ -51,8 +51,8 @@ public class ItemsCommands {
                     int amount = (int) args.get("amount");
                     for (int i = 0; i < amount; i++) {
                         player.getInventory().addItem(Items.ReviveBook.getReviveBook());
-                        player.updateInventory();
                     }
+                    player.updateInventory();
                 });
     }
 }
